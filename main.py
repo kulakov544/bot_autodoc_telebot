@@ -1,6 +1,6 @@
 import telebot
 
-from get_data import get_car_data
+from get_data import get_car_info
 from config import TOKEN
 
 bot = telebot.TeleBot(TOKEN)
@@ -14,7 +14,7 @@ def send_welcome(message):
 def handle_message(message):
     vin_car = message.text.strip()
     if len(vin_car) == 17:  # Проверка корректности VIN номера
-        car_data_info = get_car_data(vin_car)
+        car_data_info = get_car_info(vin_car)
         if car_data_info:
             reply = car_data_info
             bot.reply_to(message, reply)
