@@ -20,7 +20,7 @@ def get_car_data(vin):
 
     try:
         # URL сайта, на который будем заходить
-        url = f'https://www.autodoc.ru/catalogs/original/list-nodes/nodes?vin={vin}'  # URL нужно уточнить
+        url = f'https://www.autodoc.ru/catalogs/original/list-nodes/nodes?vin={vin}'
         driver.get(url)
 
         # Ожидание загрузки страницы
