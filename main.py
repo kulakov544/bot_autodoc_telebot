@@ -6,11 +6,9 @@ from config import TOKEN
 bot = telebot.TeleBot(TOKEN)
 
 
-# vin_car = 'WAUBH54B11N111054'
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.reply_to(message, "Добро пожаловать! Пожалуйста, отправьте VIN номер вашего автомобиля.")
-
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
@@ -24,7 +22,6 @@ def handle_message(message):
             bot.reply_to(message, f"Не удалось получить данные для VIN номера:{vin_car}")
     else:
         bot.reply_to(message, "Пожалуйста, введите корректный VIN номер (17 символов).")
-
 
 # Запуск бота
 bot.polling()
