@@ -1,10 +1,13 @@
 import telebot
+from dotenv import load_dotenv
+import os
 
 from get_data import get_car_info
-from config import TOKEN
 
+
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
 bot = telebot.TeleBot(TOKEN)
-
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
