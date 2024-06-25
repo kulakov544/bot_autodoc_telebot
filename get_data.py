@@ -19,6 +19,8 @@ def get_car_info(vin):
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
+    car_info = ""
+
     try:
         # URL сайта, на который будем заходить
         url = f'https://www.autodoc.ru/catalogs/original/list-nodes/nodes?vin={vin}'
@@ -34,27 +36,27 @@ def get_car_info(vin):
         # Парсинг данных авто
         car_info_all = driver.find_element(By.CSS_SELECTOR, '.view-dialog').text.split('\n')
         car_info = f"{car_info_all[0]}\n{car_info_all[1]}\n{car_info_all[3]}"
-        #print(car_info)
+        print(car_info)
 
         #Нахождение и нажатие кнопки для раскрытия списка деталей
-        # button_car_details = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.p-treenode-content.p-treenode-selectable.p-highlight')))
-        # button_car_details.click()
+        button_car_details = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.p-treenode-content.p-treenode-selectable.p-highlight')))
+        button_car_details.click()
 
         # Парсинг списка деталей
-        # car_details = driver.find_element(By.CSS_SELECTOR, '//li[@class="p-treenode ng-star-inserted"]').text.split('\n')
+        car_details = driver.find_element(By.CSS_SELECTOR, '.link.unauth-link')
 
-        # print(car_details)
+        print(car_details)
 
         return car_info
 
     except Exception as e:
         print(f"Ошибка: {e}")
-        return None
+        return car_info
     finally:
         driver.quit()
 
 
 
 
-# vin_car = 'WAUBH54B11N111054'
-# get_car_info(vin_car)
+vin_car = 'WAUBH54B11N111054'
+get_car_info(vin_car)
