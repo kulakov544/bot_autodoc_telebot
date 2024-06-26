@@ -15,6 +15,7 @@ def get_catalog_code_car(vin_car):
         try:
             data_catalog_namber_car = json.loads(response.text)
             print(data_catalog_namber_car)
+
             for attr in data_catalog_namber_car["commonAttributes"]:
                 if attr['key'] == "Catalog":
                     catalog_namber_car = attr['value']
@@ -29,6 +30,7 @@ def get_catalog_code_car(vin_car):
         if response.status_code == 400:
             print("Ошибка 400: Неверный запрос. Проверьте параметры и данные запроса.")
         return 0
+
 
 def get_car_info(catalog_namber_car):
     global car_info
@@ -105,5 +107,4 @@ def get_data_car(vin_car):
 
 
 # vin_car = 'WAUBH54B11N111054'
-#
 # get_data_car(vin_car)

@@ -46,8 +46,6 @@ def send_keyboard(message):
     for item in car_details:
         button = InlineKeyboardButton(text=item['name'], callback_data=item['quickGroupId'])
         keyboard.add(button)
-    # button = InlineKeyboardButton(text='Вернуться в начало', callback_data='/start')
-    # keyboard.add(button)
     bot.send_message(message.chat.id, "Выберите тип деталей:", reply_markup=keyboard)
 
 
