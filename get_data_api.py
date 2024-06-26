@@ -1,25 +1,34 @@
 import requests
 import json
 
+from config import ssd
+
 
 # URL API
 url = "https://catalogoriginal.autodoc.ru/api/catalogs/original/catalogCodes/AU1519"
-
-ssd = '$*KwGyhpe9xO_Os-6y0NWL4-r-3tnHt7C2sKeIu_P1xtHJz_jbqaS9wNbH0sLJs7Cb5vrOsLe2sLSy-q-yo8D6pOWiu6TFjPXnovLrpbqj09eY9eei4qS9sre3qPu66bqjx7GiraT3uvXxorXEtbXXzab19a7jo7ylwdXXpvX1v-OjvKXF29ym9fW96e-kvaLWx9Gbn_60w7e2zrC3teni_6KtpPOiu6TSkJmU09XUzsPVpPkAAAAAXWSxRg==$'
-
 
 def get_catalog_code_car(vin_car):
     global catalog_namber_car
     url_search_catalog_namber_car = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/cars/{vin_car}/modifications'
     response = requests.get(url_search_catalog_namber_car)
-    data_catalog_namber_car = json.loads(response.text)
+    if response.status_code == 200:
+        try:
+            data_catalog_namber_car = json.loads(response.text)
+            print(data_catalog_namber_car)
+            for attr in data_catalog_namber_car["commonAttributes"]:
+                if attr['key'] == "Catalog":
+                    catalog_namber_car = attr['value']
 
-    for attr in data_catalog_namber_car["commonAttributes"]:
-        if attr['key'] == "Catalog":
-            catalog_namber_car = attr['value']
-
-    return catalog_namber_car
-
+            return catalog_namber_car
+        except ValueError as e:
+            print(f"Ошибка при декодировании JSON: {e}")
+            return 0
+    else:
+        print(f"Ошибка: {response.status_code}")
+        print("Текст ответа:", response.text)
+        if response.status_code == 400:
+            print("Ошибка 400: Неверный запрос. Проверьте параметры и данные запроса.")
+        return 0
 
 def get_car_info(catalog_namber_car):
     global car_info
@@ -79,7 +88,6 @@ def get_articl_details(catalog_namber_car, quickGroupId):
                 i = i+1
 
             return car_articl
-
         except ValueError as e:
             print(f"Ошибка при декодировании JSON: {e}")
     else:
@@ -89,16 +97,11 @@ def get_articl_details(catalog_namber_car, quickGroupId):
             print("Ошибка 400: Неверный запрос. Проверьте параметры и данные запроса.")
 
 
-
-
 def get_data_car(vin_car):
-    catalog_namber_car = get_catalog_code_car(vin_car)
-
     car_infо = get_car_info(catalog_namber_car)
-
     car_details = get_car_details(catalog_namber_car)
 
-    return car_infо, car_details, catalog_namber_car
+    return car_infо, car_details
 
 
 # vin_car = 'WAUBH54B11N111054'
