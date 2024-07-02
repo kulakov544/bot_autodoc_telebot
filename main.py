@@ -1,5 +1,4 @@
 import telebot
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from config import TOKEN
 from keyboard import bild_keyboard_details, bild_keyboard_back
@@ -74,9 +73,14 @@ def callback_query(callback):
         keyboard_back = bild_keyboard_back()
         bot.send_message(callback.message.chat.id, "Хотите выбрать другие детали?", reply_markup=keyboard_back)
 
-# vin_car = 'WAUBH54B11N111054' VF1LA0H5324321010   Z8NAJL00050366148
-#vin_car = 'Z8NAJL00050366148'
-#https://t.me/aaqwe_test_bot
+'''
+vin_car = 'WAUBH54B11N111054' VF1LA0H5324321010   Z8NAJL00050366148
+vin_car = 'Z8NAJL00050366148'
+
+autodoc_articles_bot
+7450111568:AAGe4YKGaphh31oEzGELQ9FIOd9DaGY7mcA
+'''
+
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
