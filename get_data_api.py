@@ -16,7 +16,7 @@ def get_catalog_code_car(vin_car):
     global catalog_namber_car, ssd_car
     url_search_catalog_namber_car = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/cars/{vin_car}/modifications?clientId=375'
     response = requests.get(url_search_catalog_namber_car)
-    logger.debug("response search_catalog_namber_car: ", response)
+
 
     if response.status_code == 200:
         try:
@@ -49,7 +49,6 @@ def get_car_info(catalog_namber_car, ssd_car):
     global car_info
     url_search_car_info = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/catalogCodes/{catalog_namber_car}?ssd={ssd_car}'
     response = requests.get(url_search_car_info)
-    logger.debug("response car_info: ", response)
 
     data_car_info = json.loads(response.text)
 
