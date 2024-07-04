@@ -8,9 +8,12 @@ logger.add("debug.log", format="{time} {level} {message}")
 
 
 def get_catalog_code_car(vin_car) -> tuple[int, str, str]:
-    """Функция
-    :param: vin_car: vin номер полученный от пользователя
-    :return: status_code, catalog_number_car, ssd_car: status_code номера ошибок, номер машины в каталоге, токен передающийся с запросом
+    """
+    Функция для получения кода машины в каталоге сайта
+    :param vin_car: vin номер полученный от пользователя.
+    :return status_code: Номер ошибки или ответа от сервера.
+    :return catalog_number_car: Номер машины в каталоге.
+    :return ssd_car: Токен передающийся с запросом.
     """
 
     url_search_catalog_number_car = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/cars/{vin_car}'
@@ -59,9 +62,11 @@ def get_catalog_code_car(vin_car) -> tuple[int, str, str]:
 
 
 def get_car_info(catalog_number_car, ssd_car) -> tuple[int, dict]:
-    """Функция
-    :param: catalog_number_car, ssd_car: номер машины в каталоге
-    :return: car_info: информация о машине
+    """
+    Функция для получения информации о машине
+    :param catalog_number_car: Номер машины в каталоге.
+    :param ssd_car: Токен передающийся с запросом.
+    :return: Status_code, car_info: Номер ошибки или ответа от сервера, информация о машине
     """
 
     car_info = {}
@@ -86,8 +91,8 @@ def get_car_info(catalog_number_car, ssd_car) -> tuple[int, dict]:
 
 
 def get_car_details(catalog_number_car, ssd_car) -> tuple[int, list[dict[str, Any]]]:
-    """Функция
-    :param: catalog_number_car: номер машины в каталоге
+    """Функция для получения списка деталей
+    :param catalog_number_car: номер машины в каталоге
     :return: car_info: информация о машине
     """
     url_search_car_details = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_number_car}'
@@ -112,9 +117,10 @@ def get_car_details(catalog_number_car, ssd_car) -> tuple[int, list[dict[str, An
 
 
 def get_article_details(catalog_number_car, quickGroupId, ssd_car) -> tuple[int, list]:
-    """Функция
-        :param: catalog_number_car, quickGroupId: номер машины в каталоге, номер группы с типом детали(масляный фильтр, 
-        свечи зажигания...)
+    """Функция для получения артикулов деталей
+        :param ssd_car:
+        :param catalog_number_car: номер машины в каталоге
+        :param quickGroupId: номер группы с типом детали(масляный фильтр, свечи зажигания...)
         :return: car_article: названия деталей и артикулы
     """
     url_search_car_article = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_number_car}'
