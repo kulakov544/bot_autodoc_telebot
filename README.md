@@ -10,23 +10,25 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## О проекте
 
 ![Product Name Screen Shot][product-screenshot]
 
-Телеграмм бот получает VIN номер автомобиля от пользователя. Ищет по нему информацию о автомобиле на сайте [autodoc.ru]. 
+Телеграмм бот получает VIN номер автомобиля от пользователя. Ищет по нему информацию об автомобиле на сайте AutoDoc.ru. 
 Выдает пользователю информацию об автомобиле и спрашивает какие детали для ТО требуются. 
 Находит артикулы этих деталей и выдает пользователю.
 
 
-Если вы хотите протестировать работу бота вы можете использовать следующие VIN номера:
-
--WAUBH54B11N111054
--VF1LA0H5324321010
--Z8NAJL00050366148
 </div>
+-WAUBH54B11N111054
 
-### Built With
+-VF1LA0H5324321010
+
+-Z8NAJL00050366148
+
+
+
+### Создано с использованием
 
 - Python 3.12
 - Telebot
@@ -41,7 +43,6 @@
    git clone https://github.com/kulakov544/bot_autodoc_telebot.git
    ```
 
-
 <!-- CONTACT -->
 ## Контакты
 
@@ -49,12 +50,9 @@
 
 Ссылка на проект: [https://github.com/kulakov544/bot_autodoc_telebot.git](https://github.com/kulakov544/bot_autodoc_telebot.git)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [product-screenshot]: images/shema_autodoc_bot.png
+
