@@ -1,12 +1,12 @@
 import telebot
+from loguru import logger
 
 from config import TOKEN
 from keyboard import bild_keyboard_details, bild_keyboard_back
-from get_data_api import (get_articl_details,
+from get_data_api import (get_article_details,
                           get_catalog_code_car,
                           get_car_info,
                           get_car_details)
-
 
 bot = telebot.TeleBot(TOKEN)
 user_data = {}
@@ -14,7 +14,7 @@ user_data = {}
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.send_message(message.chat.id, "Добро пожаловать! Пожалуйста, отправьте VIN номер вашего автомобиля.")
+    bot.send_message(message.chat.id, "Добро пожаловать! Отправьте VIN номер автомобиля.")
     user_id = message.from_user.id
     if user_id not in user_data:
         user_data[user_id] = {
@@ -23,18 +23,19 @@ def send_welcome(message):
             'ssd_car': '',
             'car_info': [],
             'car_details': [],
-            'articl_details': [],
+            'article_details': [],
             'keyboard_details': ''
         }
 
 
+@logger.catch()
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
-    '''Функция
-    Запрашивает vin(vin_car). находит номер машины в каталоге(catalog_namber_car) и ssd(токен для запросов ssd_car).
+    """Функция
+    Запрашивает vin(vin_car). находит номер машины в каталоге(catalog_number_car) и ssd(токен для запросов ssd_car).
     По номеру машины находит информацию о машине(car_info) и список деталей для ТО(car_details).
     Выводит информацию о машине(reply_car_info) и клавиатуру со списком деталей(keyboard_details)
-    '''
+    """
 
     user_id = message.from_user.id
     user_info = user_data.get(user_id, {})
@@ -43,36 +44,42 @@ def handle_message(message):
     vin_car = vin_car.upper()
 
     if len(vin_car) == 17:  # Проверка корректности VIN номера
-        catalog_namber_car, ssd_car = get_catalog_code_car(vin_car)
+        status_code, catalog_number_car, ssd_car = get_catalog_code_car(vin_car)
 
-        if ssd_car == 404:
-            bot.send_message(message.chat.id, f"Не удалось найти VIN номер в базе сайта. Проверьте что он верно введен, если он верен проведите поиск через сайт:\nhttps://www.autodoc.ru/catalogs/original?findVin={vin_car}")
+        if status_code == 404:
+            bot.send_message(message.chat.id,
+                             f"Не удалось найти VIN номер в базе сайта. Проверьте что он верно введен, если он "
+                             f"верен проведите поиск через сайт:\nhttps://www.autodoc.ru/catalogs/original?"
+                             f"findVin={vin_car}")
             send_welcome(message)
-        elif ssd_car == 400 or ssd_car == 0:
-            bot.send_message(message.chat.id, "Ошибка запроса. Сообщите нам с каким vin номеров возникла проблема.")
+        elif status_code == 400 or status_code == 0:
+            bot.send_message(message.chat.id, "Ошибка запроса. Сообщите нам с каким vin номером возникла проблема.")
             send_welcome(message)
-        elif ssd_car == 503:
+        elif status_code == 503:
             bot.send_message(message.chat.id, "Сайт недоступен. Попробуйте позже.")
             send_welcome(message)
+        elif status_code == 1:
+            bot.send_message(message.chat.id, "Ошибка запроса. Сообщите нам с каким vin номером возникла проблема.")
+            send_welcome(message)
         else:
-            car_info = get_car_info(catalog_namber_car, ssd_car)
-            car_details = get_car_details(catalog_namber_car, ssd_car)
+            status_code, car_info = get_car_info(catalog_number_car, ssd_car)
+            status_code, car_details = get_car_details(catalog_number_car, ssd_car)
 
             if car_info:
+                logger.debug("car_info: {}", car_info)
                 reply_car_info = f"Марка: {car_info['brand']}\nМодель: {car_info['model']}\nГод выпуска: {car_info['release_date']}"
                 bot.send_message(message.chat.id, reply_car_info)
 
                 keyboard_details = bild_keyboard_details(car_details)
                 user_data[user_id].update({
                     'vin_car': vin_car,
-                    'catalog_number_car': catalog_namber_car,
+                    'catalog_number_car': catalog_number_car,
                     'ssd_car': ssd_car,
                     'car_info': car_info,
                     'car_details': car_details,
-                    'articl_details': [],
+                    'article_details': [],
                     'keyboard_details': keyboard_details
                 })
-
 
                 bot.send_message(message.chat.id, "Выберите тип деталей:", reply_markup=keyboard_details)
             else:
@@ -86,7 +93,7 @@ def handle_message(message):
 def callback_query(callback):
     '''Функция
     Обрабатывает нажатия на кнопки. Если выбрана деталь из списка деталей получает номер группы этой детали(quickGroupId) и
-    артикулы всех деталей этой группы(articl_details). Выводит их в сообщении пользователю и предлагает выбрать ещё раз.
+    артикулы всех деталей этой группы(article_details). Выводит их в сообщении пользователю и предлагает выбрать ещё раз.
     '''
     user_id = callback.from_user.id
     user_info = user_data.get(user_id, {})
@@ -95,31 +102,34 @@ def callback_query(callback):
         keyboard_details = user_info.get('keyboard_details', '')
         bot.send_message(callback.message.chat.id, "Выберите тип деталей:", reply_markup=keyboard_details)
     else:
-        catalog_namber_car = user_info.get('catalog_number_car', '')
+        catalog_number_car = user_info.get('catalog_number_car', '')
         ssd_car = user_info.get('ssd_car', '')
 
         quickGroupId = callback.data
 
-        articl_details = get_articl_details(catalog_namber_car, quickGroupId, ssd_car)
+        status_code, article_details = get_article_details(catalog_number_car, quickGroupId, ssd_car)
+        if status_code == 200:
+            for article in article_details:
+                message_article_details = f"{article['code']}: {article['name']}\n"
+                bot.send_message(callback.message.chat.id, message_article_details)
+                for details_info in article['details_info']:
+                    message_article_details = f"Название детали: {details_info['name']}\nАртикул детали: ```{details_info['partNumber']}```"
+                    bot.send_message(callback.message.chat.id, message_article_details)
 
-        for articl in articl_details:
-            message_articl_details = f"{articl['code']}: {articl['name']}\n"
-            bot.send_message(callback.message.chat.id, message_articl_details)
-            for details_info in articl['details_info']:
-                message_articl_details = f"Название детали: {details_info['name']}\nАртикль детали: {details_info['partNumber']}"
-                bot.send_message(callback.message.chat.id, message_articl_details)
+            keyboard_back = bild_keyboard_back()
+            bot.send_message(callback.message.chat.id, "Хотите выбрать другие детали?", reply_markup=keyboard_back)
+        elif status_code == 1:
+            bot.send_message(callback.chat.id, "Ошибка запроса. Сообщите нам с каким vin номером возникла проблема.")
+            send_welcome(callback)
 
-        keyboard_back = bild_keyboard_back()
-        bot.send_message(callback.message.chat.id, "Хотите выбрать другие детали?", reply_markup=keyboard_back)
 
 '''
 vin_car = 'WAUBH54B11N111054' VF1LA0H5324321010   Z8NAJL00050366148
 vin_car = 'Z8NAJL00050366148'
 
-autodoc_articles_bot
+autodoc_articlees_bot
 7450111568:AAGe4YKGaphh31oEzGELQ9FIOd9DaGY7mcA
 '''
-
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)

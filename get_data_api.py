@@ -1,141 +1,196 @@
+from typing import Tuple, Any, List, Dict
+
 import requests
 import json
 from loguru import logger
 
-
-logger.add("debag.log", format="{time} {level} {message}")
-
-
-def get_catalog_code_car(vin_car):
-    '''Функция
-    :param vin_car: vin омер полученный от пользователя
-    :return catalog_namber_car, ssd_car: номер машины в каталоге, токен передающийся с запросом
-    '''
-
-    url_search_catalog_namber_car = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/cars/{vin_car}/modifications?clientId=375'
-    response = requests.get(url_search_catalog_namber_car)
+logger.add("debug.log", format="{time} {level} {message}")
 
 
-    if response.status_code == 200:
-        try:
-            data_catalog_namber_car = json.loads(response.text)
+def get_catalog_code_car(vin_car) -> tuple[int, str, str]:
+    """Функция
+    :param: vin_car: vin номер полученный от пользователя
+    :return: status_code, catalog_number_car, ssd_car: status_code номера ошибок, номер машины в каталоге, токен передающийся с запросом
+    """
 
-            for attr in data_catalog_namber_car["commonAttributes"]:
-                if attr['key'] == "Catalog":
-                    catalog_namber_car = attr['value']
-                if attr['key'] == "Ssd":
-                    ssd_car = attr['value']
+    url_search_catalog_number_car = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/cars/{vin_car}'
+                                     f'/modifications?clientId=375')
+    catalog_number_car = ''
+    ssd_car = ''
+    status_code = 0
 
-            return catalog_namber_car, ssd_car
-
-        except ValueError as e:
-            #"Ошибка при декодировании JSON
-            return 0, 0
+    try:
+        response = requests.get(url_search_catalog_number_car)
+        status_code = response.status_code
+    except ValueError as e:
+        # не получается сделать запрос на сайт.
+        status_code = 0
+        return status_code, catalog_number_car, ssd_car
     else:
-        #Могут быть разные ошибки
-        if response.status_code == 400:
-            return 0, 400
-            #"Ошибка 400: Неверный запрос. Проверьте параметры и данные запроса."
-        elif response.status_code == 404:
-            return 0, 404
-        elif response.status_code == 503:
-            return 0, 503
-    return 0, 0
+        if status_code == 200:
+            try:
+                data_catalog_number_car = json.loads(response.text)
+
+                for attr in data_catalog_number_car["commonAttributes"]:
+                    if attr['key'] == "Catalog":
+                        catalog_number_car = attr['value']
+                    if attr['key'] == "Ssd":
+                        ssd_car = attr['value']
+
+                return status_code, catalog_number_car, ssd_car
+
+            except ValueError as e:
+                # "Ошибка при декодировании JSON
+                status_code = 1
+                return status_code, catalog_number_car, ssd_car
+        else:
+            # Могут быть разные ошибки
+            if response.status_code == 400:
+                status_code = 400
+                return status_code, catalog_number_car, ssd_car
+                # "Ошибка 400: Неверный запрос. Проверьте параметры и данные запроса."
+            elif response.status_code == 404:
+                status_code = 404
+                return status_code, catalog_number_car, ssd_car
+            elif response.status_code == 503:
+                status_code = 503
+                return status_code, catalog_number_car, ssd_car
+        return status_code, catalog_number_car, ssd_car
 
 
-def get_car_info(catalog_namber_car, ssd_car):
-    '''Функция
-    :param catalog_namber_car, ssd_car: номер машины в каталоге
-    :return car_info: информация о машине
-    '''
-    url_search_car_info = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/catalogCodes/{catalog_namber_car}?ssd={ssd_car}'
-    response = requests.get(url_search_car_info)
+def get_car_info(catalog_number_car, ssd_car) -> tuple[int, dict]:
+    """Функция
+    :param: catalog_number_car, ssd_car: номер машины в каталоге
+    :return: car_info: информация о машине
+    """
 
-    data_car_info = json.loads(response.text)
+    car_info = {}
+    url_search_car_info = (f"https://catalogoriginal.autodoc.ru/api/catalogs/original/catalogCodes/{catalog_number_car}"
+                           f"?ssd={ssd_car}")
 
-    for item in data_car_info["items"]:
+    try:
+        response = requests.get(url_search_car_info)
+        data_car_info = json.loads(response.text)
+        status_code = response.status_code
+    except ValueError as e:
+        # Не получается получить данные о машине
+        status_code = 1
+        return status_code, car_info
+    else:
         car_info = {
-            'brand': item['brand'],
-            'model': item['name'],
-            'release_date': item['date'][0:4]
+            'brand': data_car_info["items"][0]['brand'],
+            'model': data_car_info["items"][0]['name'],
+            'release_date': data_car_info["items"][0]['date'][0:4]
         }
+        return status_code, car_info
 
-    return car_info
 
-
-def get_car_details(catalog_namber_car, ssd_car):
-    '''Функция
-    :param catalog_namber_car: номер машины в каталоге
-    :return car_info: информация о машине
-    '''
-    url_search_car_details = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_namber_car}/cars/0/quickgroups?ssd={ssd_car}'
-    response = requests.get(url_search_car_details)
-    data_car_details = json.loads(response.text)
+def get_car_details(catalog_number_car, ssd_car) -> tuple[int, list[dict[str, Any]]]:
+    """Функция
+    :param: catalog_number_car: номер машины в каталоге
+    :return: car_info: информация о машине
+    """
+    url_search_car_details = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_number_car}'
+                              f'/cars/0/quickgroups?ssd={ssd_car}')
     car_details = []
 
-    for item in data_car_details["data"][0]['children']:
-        car_details.append({
-            'name': item['name'],
-            "quickGroupId": item['quickGroupId']
-        })
-
-    return car_details
-
-
-def get_articl_details(catalog_namber_car, quickGroupId, ssd_car):
-    '''Функция
-        :param catalog_namber_car, quickGroupId: номер машины в каталоге, номер группы с типом детали(маслянный фильтр, свечи зажигания...)
-        :return car_articl: названия деталей и артикулы
-    '''
-    url_search_car_articl = f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_namber_car}/cars/0/quickgroups/{quickGroupId}/units'
-    # Данные для отправки в запросе POST
-    payload = {
-        'ssd': ssd_car,
-    }
-    # Выполнение POST-запроса
-    response = requests.post(url_search_car_articl, json=payload)
-
-    # Проверка статуса ответа
-    if response.status_code == 200:
-        try:
-            data_car_articl = response.json()
-            # Массив для хранения нужных данных
-            car_articl = []
-
-            # Обработка данных
-            i = 0
-            for item in data_car_articl["items"]:
-                car_articl.append({'code': item['code'], 'name': item['name'], 'details_info': []})
-                for details_info in item["spareParts"]:
-                    if 'match' in details_info:
-                        car_articl[i]['details_info'].append({'name': details_info['name'], 'partNumber': details_info['partNumber']})
-                i = i+1
-
-            return car_articl
-        except ValueError as e:
-            # "Ошибка при декодировании JSON
-            return 0
+    try:
+        response = requests.get(url_search_car_details)
+        data_car_details = json.loads(response.text)
+    except ValueError as e:
+        # Не получается получить данные о деталях
+        status_code = 1
+        return status_code, car_details
+    else:
+        status_code = 0
+        for item in data_car_details["data"][0]['children']:
+            car_details.append({
+                'name': item['name'],
+                "quickGroupId": item['quickGroupId']
+            })
+        return status_code, car_details
 
 
-#Дальше идет код только для тестирования
+def get_article_details(catalog_number_car, quickGroupId, ssd_car) -> tuple[int, list]:
+    """Функция
+        :param: catalog_number_car, quickGroupId: номер машины в каталоге, номер группы с типом детали(масляный фильтр, 
+        свечи зажигания...)
+        :return: car_article: названия деталей и артикулы
+    """
+    url_search_car_article = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_number_car}'
+                              f'/cars/0/quickgroups/{quickGroupId}/units')
+    car_article = []
+
+    try:
+        # Данные для отправки в запросе POST
+        payload = {
+            'ssd': ssd_car,
+        }
+        # Выполнение POST-запроса
+        response = requests.post(url_search_car_article, json=payload)
+        status_code = response.status_code
+
+    except ValueError as e:
+        # Не получается получить данные об артикулах
+        status_code = 1
+        return status_code, car_article
+    else:
+        # Проверка статуса ответа
+        if response.status_code == 200:
+            try:
+                data_car_article = response.json()
+                # Массив для хранения нужных данных
+                car_article = []
+
+                # Обработка данных
+                i = 0
+                for item in data_car_article["items"]:
+                    car_article.append({'code': item['code'], 'name': item['name'], 'details_info': []})
+                    for details_info in item["spareParts"]:
+                        if 'match' in details_info:
+                            car_article[i]['details_info'].append(
+                                {'name': details_info['name'], 'partNumber': details_info['partNumber']})
+                    i = i + 1
+
+                return status_code, car_article
+            except ValueError as e:
+                # "Ошибка при декодировании JSON
+                status_code = 1
+                return status_code, car_article
+        else:
+            # Могут быть разные ошибки
+            if response.status_code == 400:
+                status_code = 400
+                return status_code, car_article
+                # "Ошибка 400: Неверный запрос. Проверьте параметры и данные запроса."
+            elif response.status_code == 404:
+                status_code = 404
+                return status_code, car_article
+            elif response.status_code == 503:
+                status_code = 503
+                return status_code, car_article
+            else:
+                status_code = 1
+                return status_code, car_article
+
+
+# Дальше идет код только для тестирования
 @logger.catch()
 def test_function(vin_car, quickGroupId):
-    catalog_namber_car, ssd_car = get_catalog_code_car(vin_car)
-    logger.debug("catalog_namber_car: ", catalog_namber_car, "\nssd: ", ssd_car)
-    print("catalog_namber_car: ", catalog_namber_car, "\nssd: ", ssd_car)
+    status_code, catalog_number_car, ssd_car = get_catalog_code_car(vin_car)
+    logger.debug("catalog_number_car: {}", catalog_number_car, "\nssd: {}", ssd_car)
 
-    car_info = get_car_info(catalog_namber_car, ssd_car)
-    car_details = get_car_details(catalog_namber_car, ssd_car)
-    logger.debug("car_info: ", car_info)
-    print("car_info: ", car_info)
-    print("car_details: ", car_details)
+    status_code, car_info = get_car_info(catalog_number_car, ssd_car)
+    status_code, car_details = get_car_details(catalog_number_car, ssd_car)
+    logger.debug("car_info: {}", car_info)
+    logger.debug("car_details: {}", car_details)
 
-    articl_details = get_articl_details(catalog_namber_car, quickGroupId, ssd_car)
-    logger.debug("articl_details: ", articl_details)
-    print("articl_details: ", articl_details)
+    status_code, article_details = get_article_details(catalog_number_car, quickGroupId, ssd_car)
+    logger.debug("article_details: {}", article_details)
 
 
+#
 # quickGroupId = 2
-# vin_car = 'VF1LA0H5324321010'
+# vin_car = 'Z8NAJL00050366148'
 #
 # test_function(vin_car, quickGroupId)

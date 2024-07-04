@@ -12,7 +12,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]]
+![Product Name Screen Shot][product-screenshot]
 
 Телеграмм бот получает VIN номер автомобиля от пользователя. Ищет по нему информацию о автомобиле на сайте [autodoc.ru]. 
 Выдает пользователю информацию об автомобиле и спрашивает какие детали для ТО требуются. 
