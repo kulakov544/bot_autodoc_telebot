@@ -1,8 +1,0 @@
-  File "/home/autodoc_bot/main.py", line 61
-    reply_car_info = f'Марка: {car_info['brand']}\nМодель: {car_info['model']}\nГод выпуска: {car_info['release_date']}'
-                                              ^^^^^
-SyntaxError: f-string: unmatched '['
-  File "/home/autodoc_bot/main.py", line 61
-    reply_car_info = f'Марка: {car_info['brand']}\nМодель: {car_info['model']}\nГод выпуска: {car_info['release_date']}'
-                                              ^^^^^
-SyntaxError: f-string: unmatched '['
