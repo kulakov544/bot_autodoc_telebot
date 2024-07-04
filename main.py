@@ -51,16 +51,16 @@ def handle_message(message):
                              f"Не удалось найти VIN номер в базе сайта. Проверьте что он верно введен, если он "
                              f"верен проведите поиск через сайт:\nhttps://www.autodoc.ru/catalogs/original?"
                              f"findVin={vin_car}")
-            send_welcome(message)
+            bot.send_message(message.chat.id, "Отправьте VIN номер автомобиля.")
         elif status_code == 400 or status_code == 0:
             bot.send_message(message.chat.id, "Ошибка запроса. Сообщите нам с каким vin номером возникла проблема.")
-            send_welcome(message)
+            bot.send_message(message.chat.id, "Отправьте VIN номер автомобиля.")
         elif status_code == 503:
             bot.send_message(message.chat.id, "Сайт недоступен. Попробуйте позже.")
-            send_welcome(message)
+            bot.send_message(message.chat.id, "Отправьте VIN номер автомобиля.")
         elif status_code == 1:
             bot.send_message(message.chat.id, "Ошибка запроса. Сообщите нам с каким vin номером возникла проблема.")
-            send_welcome(message)
+            bot.send_message(message.chat.id, "Отправьте VIN номер автомобиля.")
         else:
             status_code, car_info = get_car_info(catalog_number_car, ssd_car)
             status_code, car_details = get_car_details(catalog_number_car, ssd_car)
@@ -92,7 +92,7 @@ def handle_message(message):
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_query(callback):
     '''Функция
-    Обрабатывает нажатия на кнопки. Если выбрана деталь из списка деталей получает номер группы этой детали(quickGroupId) и
+    Обрабатывает нажатия на кнопки. Если выбрана деталь из списка деталей получает номер группы этой детали(quick_group_id) и
     артикулы всех деталей этой группы(article_details). Выводит их в сообщении пользователю и предлагает выбрать ещё раз.
     '''
     user_id = callback.from_user.id
@@ -100,36 +100,28 @@ def callback_query(callback):
 
     if callback.data == "back":
         keyboard_details = user_info.get('keyboard_details', '')
-        bot.send_message(callback.message.chat.id, "Выберите тип деталей:", reply_markup=keyboard_details)
+        bot.send_message(callback.message.chat.id, "Выберите тип деталей:", reply_markup = keyboard_details)
     else:
         catalog_number_car = user_info.get('catalog_number_car', '')
         ssd_car = user_info.get('ssd_car', '')
 
-        quickGroupId = callback.data
+        quick_group_id = callback.data
 
-        status_code, article_details = get_article_details(catalog_number_car, quickGroupId, ssd_car)
+        status_code, article_details = get_article_details(catalog_number_car, quick_group_id, ssd_car)
         if status_code == 200:
             for article in article_details:
                 message_article_details = f"{article['code']}: {article['name']}\n"
                 bot.send_message(callback.message.chat.id, message_article_details)
                 for details_info in article['details_info']:
-                    message_article_details = f"Название детали: {details_info['name']}\nАртикул детали: ```{details_info['partNumber']}```"
+                    message_article_details = f"Название детали: {details_info['name']}\nАртикул детали: {details_info['partNumber']}"
                     bot.send_message(callback.message.chat.id, message_article_details)
 
             keyboard_back = bild_keyboard_back()
             bot.send_message(callback.message.chat.id, "Хотите выбрать другие детали?", reply_markup=keyboard_back)
         elif status_code == 1:
             bot.send_message(callback.chat.id, "Ошибка запроса. Сообщите нам с каким vin номером возникла проблема.")
-            send_welcome(callback)
+            bot.send_message(callback.chat.id, "Отправьте VIN номер автомобиля.")
 
-
-'''
-vin_car = 'WAUBH54B11N111054' VF1LA0H5324321010   Z8NAJL00050366148
-vin_car = 'Z8NAJL00050366148'
-
-autodoc_articlees_bot
-7450111568:AAGe4YKGaphh31oEzGELQ9FIOd9DaGY7mcA
-'''
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)

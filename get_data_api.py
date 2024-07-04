@@ -11,9 +11,9 @@ def get_catalog_code_car(vin_car) -> tuple[int, str, str]:
     """
     Функция для получения кода машины в каталоге сайта
     :param vin_car: vin номер полученный от пользователя.
-    :return status_code: Номер ошибки или ответа от сервера.
-    :return catalog_number_car: Номер машины в каталоге.
-    :return ssd_car: Токен передающийся с запросом.
+    :return:    Status_code: Номер ошибки или ответа от сервера.
+                Catalog_number_car: Номер машины в каталоге.
+                Ssd_car: Токен передающийся с запросом.
     """
 
     url_search_catalog_number_car = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/cars/{vin_car}'
@@ -66,7 +66,8 @@ def get_car_info(catalog_number_car, ssd_car) -> tuple[int, dict]:
     Функция для получения информации о машине
     :param catalog_number_car: Номер машины в каталоге.
     :param ssd_car: Токен передающийся с запросом.
-    :return: Status_code, car_info: Номер ошибки или ответа от сервера, информация о машине
+    :return:    Status_code: Номер ошибки или ответа от сервера
+                car_info: Информация о машине
     """
 
     car_info = {}
@@ -111,20 +112,20 @@ def get_car_details(catalog_number_car, ssd_car) -> tuple[int, list[dict[str, An
         for item in data_car_details["data"][0]['children']:
             car_details.append({
                 'name': item['name'],
-                "quickGroupId": item['quickGroupId']
+                "quick_group_id": item['quickGroupId']
             })
         return status_code, car_details
 
 
-def get_article_details(catalog_number_car, quickGroupId, ssd_car) -> tuple[int, list]:
+def get_article_details(catalog_number_car, quick_group_id, ssd_car) -> tuple[int, list]:
     """Функция для получения артикулов деталей
         :param ssd_car:
         :param catalog_number_car: номер машины в каталоге
-        :param quickGroupId: номер группы с типом детали(масляный фильтр, свечи зажигания...)
+        :param quick_group_id: номер группы с типом детали(масляный фильтр, свечи зажигания...)
         :return: car_article: названия деталей и артикулы
     """
     url_search_car_article = (f'https://catalogoriginal.autodoc.ru/api/catalogs/original/brands/{catalog_number_car}'
-                              f'/cars/0/quickgroups/{quickGroupId}/units')
+                              f'/cars/0/quickgroups/{quick_group_id}/units')
     car_article = []
 
     try:
@@ -182,7 +183,7 @@ def get_article_details(catalog_number_car, quickGroupId, ssd_car) -> tuple[int,
 
 # Дальше идет код только для тестирования
 @logger.catch()
-def test_function(vin_car, quickGroupId):
+def test_function(vin_car, quick_group_id):
     status_code, catalog_number_car, ssd_car = get_catalog_code_car(vin_car)
     logger.debug("catalog_number_car: {}", catalog_number_car, "\nssd: {}", ssd_car)
 
@@ -191,12 +192,12 @@ def test_function(vin_car, quickGroupId):
     logger.debug("car_info: {}", car_info)
     logger.debug("car_details: {}", car_details)
 
-    status_code, article_details = get_article_details(catalog_number_car, quickGroupId, ssd_car)
+    status_code, article_details = get_article_details(catalog_number_car, quick_group_id, ssd_car)
     logger.debug("article_details: {}", article_details)
 
 
 #
-# quickGroupId = 2
+# quick_group_id = 2
 # vin_car = 'Z8NAJL00050366148'
 #
-# test_function(vin_car, quickGroupId)
+# test_function(vin_car, quick_group_id)
