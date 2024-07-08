@@ -1,4 +1,6 @@
 import telebot
+import time
+import requests
 
 from config import TOKEN
 from keyboard import bild_keyboard_details, bild_keyboard_back
@@ -8,9 +10,9 @@ from get_data_api import (get_article_details,
                           get_car_info,
                           get_car_details)
 
-
 bot = telebot.TeleBot(TOKEN)
 user_data = {}
+
 
 @logger.catch()
 @bot.message_handler(commands=['start'])
@@ -110,7 +112,7 @@ def callback_query(callback):
 
     if callback.data == "back":
         keyboard_details = user_info.get('keyboard_details', '')
-        bot.send_message(callback.message.chat.id, "Выберите тип деталей:", reply_markup = keyboard_details)
+        bot.send_message(callback.message.chat.id, "Выберите тип деталей:", reply_markup=keyboard_details)
     else:
         catalog_number_car = user_info.get('catalog_number_car', '')
         ssd_car = user_info.get('ssd_car', '')
@@ -134,6 +136,21 @@ def callback_query(callback):
             bot.send_message(callback.chat.id, "Отправьте VIN номер автомобиля.")
 
 
+def start_polling():
+    while True:
+        try:
+            bot.polling(none_stop=True, timeout=60, long_polling_timeout=60)
+        except telebot.apihelper.ApiTelegramException as e:
+            logger.error(f"API exception occurred: {e}")
+            time.sleep(5)  # Ждем 5 секунд перед повторной попыткой
+        except requests.exceptions.ReadTimeout:
+            logger.error("Read timeout occurred, retrying...")
+            time.sleep(5)  # Ждем 5 секунд перед повторной попыткой
+        except Exception as e:
+            logger.error(f"An unexpected exception occurred: {e}")
+            time.sleep(5)  # Ждем 5 секунд перед повторной попыткой
+
+
 if __name__ == '__main__':
     logger.info('Старт бота.')
-    bot.polling(none_stop=True)
+    bot.polling()
