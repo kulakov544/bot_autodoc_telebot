@@ -179,25 +179,3 @@ def get_article_details(catalog_number_car, quick_group_id, ssd_car) -> tuple[in
             else:
                 status_code = 1
                 return status_code, car_article
-
-
-# Дальше идет код только для тестирования
-# @LOGER_UTILS.catch()
-# def test_function(vin_car, quick_group_id):
-#     status_code, catalog_number_car, ssd_car = get_catalog_code_car(vin_car)
-#     LOGER_UTILS.debug("catalog_number_car: {}", catalog_number_car, "\nssd: {}", ssd_car)
-#
-#     status_code, car_info = get_car_info(catalog_number_car, ssd_car)
-#     status_code, car_details = get_car_details(catalog_number_car, ssd_car)
-#     LOGER_UTILS.debug("car_info: {}", car_info)
-#     LOGER_UTILS.debug("car_details: {}", car_details)
-#
-#     status_code, article_details = get_article_details(catalog_number_car, quick_group_id, ssd_car)
-#     LOGER_UTILS.debug("article_details: {}", article_details)
-
-
-#
-# quick_group_id = 2
-# vin_car = 'Z8NAJL00050366148'
-#
-# test_function(vin_car, quick_group_id)
