@@ -2,9 +2,8 @@ from typing import Tuple, Any, List, Dict
 
 import requests
 import json
-from loguru import logger
 
-logger.add("debug.log", format="{time} {level} {message}")
+from loger_util import logger
 
 
 def get_catalog_code_car(vin_car) -> tuple[int, str, str]:
@@ -21,6 +20,7 @@ def get_catalog_code_car(vin_car) -> tuple[int, str, str]:
     catalog_number_car = ''
     ssd_car = ''
     status_code = 0
+    logger.info('Запрос кода машины')
 
     try:
         response = requests.get(url_search_catalog_number_car)
@@ -182,18 +182,18 @@ def get_article_details(catalog_number_car, quick_group_id, ssd_car) -> tuple[in
 
 
 # Дальше идет код только для тестирования
-@logger.catch()
-def test_function(vin_car, quick_group_id):
-    status_code, catalog_number_car, ssd_car = get_catalog_code_car(vin_car)
-    logger.debug("catalog_number_car: {}", catalog_number_car, "\nssd: {}", ssd_car)
-
-    status_code, car_info = get_car_info(catalog_number_car, ssd_car)
-    status_code, car_details = get_car_details(catalog_number_car, ssd_car)
-    logger.debug("car_info: {}", car_info)
-    logger.debug("car_details: {}", car_details)
-
-    status_code, article_details = get_article_details(catalog_number_car, quick_group_id, ssd_car)
-    logger.debug("article_details: {}", article_details)
+# @LOGER_UTILS.catch()
+# def test_function(vin_car, quick_group_id):
+#     status_code, catalog_number_car, ssd_car = get_catalog_code_car(vin_car)
+#     LOGER_UTILS.debug("catalog_number_car: {}", catalog_number_car, "\nssd: {}", ssd_car)
+#
+#     status_code, car_info = get_car_info(catalog_number_car, ssd_car)
+#     status_code, car_details = get_car_details(catalog_number_car, ssd_car)
+#     LOGER_UTILS.debug("car_info: {}", car_info)
+#     LOGER_UTILS.debug("car_details: {}", car_details)
+#
+#     status_code, article_details = get_article_details(catalog_number_car, quick_group_id, ssd_car)
+#     LOGER_UTILS.debug("article_details: {}", article_details)
 
 
 #
