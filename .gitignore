@@ -119,6 +119,8 @@ celerybeat-schedule
 celerybeat.pid
 Dockerfile
 nohup.out
+kulakovav.ru
+
 
 # SageMath parsed files
 *.sage.py
