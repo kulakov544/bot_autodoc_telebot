@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  autodoc-bot:
+    build: .
+    container_name: autodoc-bot
+    working_dir: /app
+    volumes:
+      - .:/app
+      - logs:/app/logs
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+    command: python main.py
+
+volumes:
+  logs:
