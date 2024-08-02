@@ -75,8 +75,6 @@ def handle_message(message):
             status_code, car_details = get_car_details(catalog_number_car, ssd_car)
 
             if car_info:
-                logger.debug("car_info: {}", car_info)
-                logger.debug("car_details: {}", car_details)
                 reply_car_info = f"Марка: {car_info['brand']}\nМодель: {car_info['model']}\nГод выпуска: {car_info['release_date']}"
                 bot.send_message(message.chat.id, reply_car_info)
                 logger.info("Информация по машине для пользователя {} найдена.", user_id)
@@ -153,4 +151,4 @@ def start_polling():
 
 if __name__ == '__main__':
     logger.info('Старт бота.')
-    bot.polling()
+    start_polling()

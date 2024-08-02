@@ -117,7 +117,7 @@ __pypackages__/
 # Celery stuff
 celerybeat-schedule
 celerybeat.pid
-Dockerfile
+../bot_autodoc_telebot/Dockerfile
 nohup.out
 kulakovav.ru
 
